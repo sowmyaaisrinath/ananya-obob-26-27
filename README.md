@@ -6,9 +6,9 @@ There is nothing to type and nothing to sign into. The site has no database, so 
 
 ## Live site
 
-After the first GitHub Pages deploy:
-
 https://sowmyaaisrinath.github.io/ananya-obob-26-27/
+
+Visit counts (no cookies) are in GoatCounter: https://ananya-obob.goatcounter.com
 
 ## Open it locally
 
