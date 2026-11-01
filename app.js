@@ -491,7 +491,7 @@ function renderContributors() {
         <p>Thank you for contributing original close-reading questions to the practice deck.</p>
         <p class="meta">${pending} questions are awaiting answer-key verification. They appear in Cards, but are excluded from scored practice battles until reviewed.</p>
       </article>
-      <p class="note">Ananya Bharadwaj is part of the student OBOB group. Questions will be credited to her when she contributes them.</p>
+      <p class="note">Every student who contributes questions can be recognized by name, with their permission.</p>
     </section>
     <section class="contributor-panel">
       <h3>Public practice sources</h3>
