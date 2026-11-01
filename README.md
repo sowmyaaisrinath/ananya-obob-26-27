@@ -41,3 +41,10 @@ This is a static site. The workflow in `.github/workflows/deploy.yml` publishes 
 1. Push `main` to GitHub.
 2. In the repo **Settings → Pages**, set source to **GitHub Actions**.
 3. Every later push to `main` updates the live site.
+
+
+## Credits and sources
+
+Question cards show their origin directly on the card. Student-written questions name their student author; site-created questions are labeled as such. The Contributors & sources tab links to public library and community practice resources. External question sets are linked at their original location unless permission to reproduce their text is confirmed.
+
+Student-submitted questions may appear in the Cards deck while their answer keys are being checked. Questions awaiting answer verification are excluded from scored practice battles.
