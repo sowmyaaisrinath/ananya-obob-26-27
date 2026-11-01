@@ -18,7 +18,7 @@ Open `index.html` in a browser, or run `python3 -m http.server` in this folder.
 
 **Books** has the facts for all 16 titles plus a list of details worth hunting while you read.
 
-**Cards** is the full deck. Tap a card to turn it over. Tap more than one book to keep several on the table, then filter by round or by how hard the card should feel.
+**Cards** is the full deck. Tap a card to turn it over. Tap more than one book to keep several on the table, then filter by round or by how hard the card should feel. Shuffle mixes the questions into a random order so you cannot guess what comes next from the list.
 
 **Battle** deals 16 cards in the real shape: eight "In Which Book," then eight content, each from a different book. Read them aloud, give 15 seconds, keep score on paper.
 

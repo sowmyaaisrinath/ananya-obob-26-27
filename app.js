@@ -14,7 +14,7 @@ const SLUGS = {
 
 /* Nothing here is saved. Reloading the page starts over, which is the point:
    there is no database behind this site. */
-const view = { tab: "plan", books: [], type: "all", level: "all", battle: [] };
+const view = { tab: "plan", books: [], type: "all", level: "all", shuffled: false, deckIds: [], battle: [] };
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
@@ -282,8 +282,8 @@ function toggleBookFilter(id) {
   view.books = view.books.concat(id);
 }
 
-function renderCards() {
-  const shown = QUESTIONS.filter((item) => {
+function filteredCards() {
+  return QUESTIONS.filter((item) => {
     if (view.books.length && !view.books.includes(item.bookId)) return false;
     if (view.type === "iwb" && item.type !== "iwb") return false;
     if (view.type === "content" && item.type === "iwb") return false;
@@ -291,12 +291,28 @@ function renderCards() {
     if (view.level !== "all" && item.level !== view.level) return false;
     return true;
   });
+}
+
+function shownCards() {
+  const filtered = filteredCards();
+  if (!view.shuffled) return filtered;
+  const byId = {};
+  filtered.forEach((item) => { byId[item.id] = item; });
+  const kept = view.deckIds.filter((id) => byId[id]);
+  const extras = shuffle(filtered.filter((item) => !kept.includes(item.id))).map((item) => item.id);
+  view.deckIds = kept.concat(extras);
+  return view.deckIds.map((id) => byId[id]);
+}
+
+function renderCards() {
+  const shown = shownCards();
   const bookNote = view.books.length
     ? view.books.length + (view.books.length === 1 ? " book" : " books")
     : "all 16 books";
+  const orderNote = view.shuffled ? " in a mixed-up order" : " in book order";
   return `
     <h2>Flip cards</h2>
-    <p class="sub">${shown.length} showing from ${bookNote}. Tap more than one book to keep several on the table. Nothing is saved, so a reload brings every card back face up.</p>
+    <p class="sub">${shown.length} showing from ${bookNote}${orderNote}. Tap more than one book to keep several on the table. Shuffle mixes the questions so you cannot guess what comes next from the list. Nothing is saved, so a reload brings every card back face up.</p>
     <div class="filters noprint">
       <div class="pills"><span class="pill-label">Book</span>
         ${pill("book", "all", "All")}
@@ -314,6 +330,8 @@ function renderCards() {
       </div>
     </div>
     <div class="row noprint" style="margin-bottom:14px">
+      <button type="button" class="ghost" data-action="shuffle">${view.shuffled ? "Shuffle again" : "Shuffle the cards"}</button>
+      ${view.shuffled ? '<button type="button" class="ghost" data-action="unshuffle">Put them back in book order</button>' : ""}
       <button type="button" class="ghost" data-action="flip-all">Turn them all over</button>
       <button type="button" class="ghost" data-action="flip-none">Turn them all back</button>
       <button type="button" class="ghost" data-action="print">Print these cards</button>
@@ -413,12 +431,24 @@ function bind() {
       view.books = [target.dataset.book];
       view.type = "all";
       view.level = "all";
+      view.shuffled = false;
+      view.deckIds = [];
       render();
       window.scrollTo(0, 0);
     }
     if (action === "filter") {
       if (target.dataset.group === "book") toggleBookFilter(target.dataset.value);
       else view[target.dataset.group] = target.dataset.value;
+      render();
+    }
+    if (action === "shuffle") {
+      view.shuffled = true;
+      view.deckIds = shuffle(filteredCards()).map((item) => item.id);
+      render();
+    }
+    if (action === "unshuffle") {
+      view.shuffled = false;
+      view.deckIds = [];
       render();
     }
     if (action === "flip-all") {
