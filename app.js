@@ -78,6 +78,7 @@ function isContent(item) {
 
 function answerOf(item) {
   const book = bookById(item.bookId);
+  if (item.reviewStatus === "pending") return "Answer key pending verification. This question is not yet included in scored battles.";
   if (item.type === "iwb") return book.title + " by " + byline(book);
   if (item.parts) return item.parts.join(" AND ");
   return [item.answer, ...(item.alternates || [])].filter(Boolean).join(" OR ");
@@ -135,13 +136,15 @@ function battleBookNote() {
   return view.battleBooks.length + (view.battleBooks.length === 1 ? " book" : " books");
 }
 
+function isPracticeReady(item) { return item.reviewStatus !== "pending"; }
+
 function pickBattleRound(books, typeCheck, limit) {
   const used = new Set();
   const picked = [];
   shuffle(books).forEach((book) => {
     if (picked.length >= limit) return;
     const choice = shuffle(QUESTIONS.filter((item) =>
-      item.bookId === book.id && typeCheck(item) && !used.has(item.id)
+      item.bookId === book.id && typeCheck(item) && isPracticeReady(item) && !used.has(item.id)
     ))[0];
     if (choice) {
       used.add(choice.id);
@@ -150,7 +153,7 @@ function pickBattleRound(books, typeCheck, limit) {
   });
   if (picked.length < limit) {
     const extras = shuffle(QUESTIONS.filter((item) =>
-      books.some((book) => book.id === item.bookId) && typeCheck(item) && !used.has(item.id)
+      books.some((book) => book.id === item.bookId) && typeCheck(item) && isPracticeReady(item) && !used.has(item.id)
     ));
     extras.slice(0, limit - picked.length).forEach((item) => picked.push(item));
   }
@@ -160,27 +163,27 @@ function pickBattleRound(books, typeCheck, limit) {
 function buildBattle() {
   const pool = battlePool();
   const both = shuffle(pool.filter((book) =>
-    QUESTIONS.some((item) => item.bookId === book.id && item.type === "iwb") &&
-    QUESTIONS.some((item) => item.bookId === book.id && isContent(item))
+    QUESTIONS.some((item) => item.bookId === book.id && item.type === "iwb" && isPracticeReady(item)) &&
+    QUESTIONS.some((item) => item.bookId === book.id && isContent(item) && isPracticeReady(item))
   ));
   if (both.length >= 16) {
     const picked = [];
     both.slice(0, 8).forEach((book) => {
-      const choice = shuffle(QUESTIONS.filter((item) => item.bookId === book.id && item.type === "iwb"))[0];
+      const choice = shuffle(QUESTIONS.filter((item) => item.bookId === book.id && item.type === "iwb" && isPracticeReady(item)))[0];
       if (choice) picked.push(choice);
     });
     both.slice(8, 16).forEach((book) => {
-      const choice = shuffle(QUESTIONS.filter((item) => item.bookId === book.id && isContent(item)))[0];
+      const choice = shuffle(QUESTIONS.filter((item) => item.bookId === book.id && isContent(item) && isPracticeReady(item)))[0];
       if (choice) picked.push(choice);
     });
     view.battle = picked;
     return;
   }
   const withIwb = pool.filter((book) =>
-    QUESTIONS.some((item) => item.bookId === book.id && item.type === "iwb")
+    QUESTIONS.some((item) => item.bookId === book.id && item.type === "iwb" && isPracticeReady(item))
   );
   const withContent = pool.filter((book) =>
-    QUESTIONS.some((item) => item.bookId === book.id && isContent(item))
+    QUESTIONS.some((item) => item.bookId === book.id && isContent(item) && isPracticeReady(item))
   );
   view.battle = pickBattleRound(withIwb, (item) => item.type === "iwb", 8)
     .concat(pickBattleRound(withContent, isContent, 8));
@@ -206,6 +209,7 @@ function render() {
         ${navButton("cards", "Cards")}
         ${navButton("battle", "Battle")}
         ${navButton("patterns", "Patterns")}
+        ${navButton("contributors", "Contributors & sources")}
       </nav>
       ${body()}
       <p class="foot">Book facts from <a href="https://obob.dog/books/2026-2027/3-5">OBOB.dog</a> and the ISBN list posted by the <a href="https://cedarmillptc.org/oregon-battle-of-the-books">Cedar Mill PTC</a>. Battle rules from the <a href="https://www.oregonbattleofthebooks.org/wp-content/uploads/2024/11/Handbook-2024-2025.pdf">OBOB handbook</a>. Official battle cards are not public, and these answers have not been checked against the official printings. Confirm anything before you use it in a real battle.</p>
@@ -222,6 +226,7 @@ function body() {
   if (view.tab === "cards") return renderCards();
   if (view.tab === "battle") return renderBattle();
   if (view.tab === "patterns") return renderPatterns();
+  if (view.tab === "contributors") return renderContributors();
   return renderPlan();
 }
 
@@ -388,6 +393,14 @@ function pill(group, value, label) {
   return `<button type="button" class="pill ${on ? "on" : ""}" data-action="filter" data-group="${group}" data-value="${esc(value)}">${esc(label)}</button>`;
 }
 
+
+function creditLine(item) {
+  if (item.sourceType === "student") return `<span class="credit student-credit">Student contribution · Written by ${esc(item.contributor)}</span>`;
+  if (item.sourceType === "library") return `<span class="credit library-credit">Library contribution · ${esc(item.sourceName || "Library source")}</span>`;
+  if (item.sourceType === "volunteer") return `<span class="credit volunteer-credit">Volunteer contribution · ${esc(item.contributor || item.sourceName || "OBOB volunteer")}</span>`;
+  return `<span class="credit site-credit">Site-created practice question</span>`;
+}
+
 function flipCard(item) {
   const book = bookById(item.bookId);
   return `<button type="button" class="flip" data-action="flip" aria-label="Flip card">
@@ -398,6 +411,7 @@ function flipCard(item) {
           <span class="badge">${LEVELS[item.level]}</span>
         </span>
         <span class="prompt-sm">${esc(item.prompt)}</span>
+        ${creditLine(item)}
         <span class="hint">${item.type === "iwb" ? "Answer with the title and the author" : esc(book.title)}</span>
       </span>
       <span class="face back">
@@ -460,6 +474,46 @@ function renderBattle() {
     <div class="deck">${iwb.map(flipCard).join("")}</div>
     <h3 style="margin-top:22px">Round two — Content <span class="sub">(${content.length})</span></h3>
     <div class="deck">${content.map(flipCard).join("")}</div>` : ""}`;
+}
+
+
+function renderContributors() {
+  const studentCards = QUESTIONS.filter((item) => item.sourceType === "student");
+  const pending = studentCards.filter((item) => item.reviewStatus === "pending").length;
+  return `
+    <h2>Contributors & sources</h2>
+    <p class="sub">Credits are shown on each question card, not hidden in a footnote. External practice sets remain linked to their original publishers unless reuse permission is confirmed.</p>
+    <section class="contributor-panel">
+      <h3>Student question writers</h3>
+      <article class="contributor-card">
+        <div class="contributor-name">Aishani Hegde</div>
+        <p class="contributor-role">Student contributor · ${studentCards.length} questions submitted</p>
+        <p>Thank you for contributing original close-reading questions to the practice deck.</p>
+        <p class="meta">${pending} questions are awaiting answer-key verification. They appear in Cards, but are excluded from scored practice battles until reviewed.</p>
+      </article>
+      <p class="note">Ananya Bharadwaj is part of the student OBOB group. Questions will be credited to her when she contributes them.</p>
+    </section>
+    <section class="contributor-panel">
+      <h3>Public practice sources</h3>
+      <p>These organizations and community resources publish or collect unofficial practice material. Use the original pages for their question sets.</p>
+      <ul class="source-directory">
+        <li><strong>Cedar Mill & Bethany Community Libraries</strong> — 2026–27 practice sets. <a href="https://library.cedarmill.org/kids/obob/" target="_blank" rel="noopener">Visit source</a></li>
+        <li><strong>Newberg Public Library</strong> — OBOB practice questions and links to public sets. <a href="https://www.newbergoregon.gov/government/departments/library/oregon_battle_of_the_books.php" target="_blank" rel="noopener">Visit source</a></li>
+        <li><strong>Findley Elementary, Beaverton School District</strong> — OBOB resources; some materials require school access. <a href="https://findley.beaverton.k12.or.us/academics/obob" target="_blank" rel="noopener">Visit source</a></li>
+        <li><strong>Lake Oswego Public Library</strong> — 2026–27 OBOB practice-question updates. <a href="https://www.ci.oswego.or.us/kids/obob-2026-27" target="_blank" rel="noopener">Visit source</a></li>
+        <li><strong>Beaverton City Library</strong> — branch-based unofficial practice questions. <a href="https://www.beavertonlibrary.org/370/Oregon-Battle-of-the-Books" target="_blank" rel="noopener">Visit source</a></li>
+        <li><strong>OBOB.dog community</strong> — volunteer- and library-contributed practice resources. <a href="https://obob.dog/about" target="_blank" rel="noopener">Visit source</a></li>
+      </ul>
+    </section>
+    <section class="contributor-panel">
+      <h3>How credits work</h3>
+      <ul>
+        <li><strong>Student contribution:</strong> the student's name appears on each question they wrote.</li>
+        <li><strong>Library or volunteer source:</strong> the originating organization or contributor is named and linked.</li>
+        <li><strong>Site-created:</strong> original questions written for this site are labeled as such.</li>
+        <li><strong>Permission:</strong> external question text is only reproduced when reuse is allowed; otherwise the site links to the original set.</li>
+      </ul>
+    </section>`;
 }
 
 function renderPatterns() {
