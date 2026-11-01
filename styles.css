@@ -205,3 +205,15 @@ summary { cursor: pointer; color: var(--green); }
   .face.back .badge { background: #eee; }
   .card, .stat, .pattern { box-shadow: none; break-inside: avoid; }
 }
+
+
+/* Prominent provenance labels and contributor directory */
+.credit { display:inline-block; align-self:flex-start; margin-top:2px; padding:5px 9px; border-radius:8px; border:1px solid var(--line); background:#eee9f4; color:#514064; font-size:12px; font-weight:700; line-height:1.35; }
+.student-credit { background:#e4efe6; color:#17452d; border-color:#b7d2bd; }
+.library-credit { background:#e5edf6; color:#24486c; border-color:#bfd0e2; }
+.volunteer-credit { background:#f5e8dd; color:#75411e; border-color:#e5c7ad; }
+.contributor-panel { margin:18px 0; padding:18px; background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); }
+.contributor-card { padding:14px; border-left:5px solid var(--green-2); background:#f3f7f1; border-radius:8px; }
+.contributor-name { font-family:var(--serif); font-size:24px; font-weight:700; }
+.contributor-role { margin:2px 0 8px; color:var(--green); font-weight:700; }
+.source-directory li { margin:12px 0; }
