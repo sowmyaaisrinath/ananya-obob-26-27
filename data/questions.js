@@ -931,7 +931,7 @@ const QUESTIONS = [
   q("grace-of-wild-things", "content", "who", "state", "In The Grace of Wild Things, what is Sareena's family background?", "Lebanese and French Canadian"),
   q("grace-of-wild-things", "content", "who", "state", "In The Grace of Wild Things, what is the name of the witch's brother?", "Patrick"),
   q("grace-of-wild-things", "content", "who", "state", "In The Grace of Wild Things, besides Emily Dickinson, which poet's words also open chapters?", "Alfred, Lord Tennyson", ["Tennyson"]),
-  q("grace-of-wild-things", "two-part", "two-part", "state", "This is a two-part question. In The Grace of Wild Things, name two writers whose words open the chapters.", null, [], ["Emily Dickinson", "Alfred, Lord Tennyson"])
+  q("grace-of-wild-things", "two-part", "two-part", "state", "This is a two-part question. In The Grace of Wild Things, name two writers whose words open the chapters.", null, [], ["Emily Dickinson", "Alfred, Lord Tennyson"]),
 
   // ---------- Additional cross-list practice cards ----------
   // These clues are deliberately short and are based on the book summaries
@@ -952,8 +952,7 @@ const QUESTIONS = [
   q("murder-at-the-museum", "iwb", "action", "jacket", "In which book does a young detective investigate a mysterious death in a museum?"),
   q("end-of-the-world", "iwb", "action", "jacket", "In which book does a power outage leave a group of children wondering whether their families are the only people left?"),
   q("connect-the-stars", "iwb", "setting", "jacket", "In which book do two young people face bullying and difficult challenges at a wilderness camp?"),
-  q("grace-of-wild-things", "iwb", "object", "jacket", "In which book must a girl learn every spell in a witch's book before a deadline?")
-
+  q("grace-of-wild-things", "iwb", "object", "jacket", "In which book must a girl learn every spell in a witch's book before a deadline?"),
 
   // Student-contributed questions by Aishani Hegde.
   // Answer keys await verification against the group's print editions.
