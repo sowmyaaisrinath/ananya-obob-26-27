@@ -927,4 +927,26 @@ const QUESTIONS = [
   q("grace-of-wild-things", "content", "who", "state", "In The Grace of Wild Things, what is the name of the witch's brother?", "Patrick"),
   q("grace-of-wild-things", "content", "who", "state", "In The Grace of Wild Things, besides Emily Dickinson, which poet's words also open chapters?", "Alfred, Lord Tennyson", ["Tennyson"]),
   q("grace-of-wild-things", "two-part", "two-part", "state", "This is a two-part question. In The Grace of Wild Things, name two writers whose words open the chapters.", null, [], ["Emily Dickinson", "Alfred, Lord Tennyson"])
+
+  // ---------- Additional cross-list practice cards ----------
+  // These clues are deliberately short and are based on the book summaries
+  // or plot facts already represented in this deck. Verify against the team's
+  // own printing before using them in a scored battle.
+  q("frindle", "iwb", "action", "regional", "In which book does a student persuade classmates to use an invented word even when a teacher forbids it?"),
+  q("dogtown", "iwb", "object", "jacket", "In which book do a dog, a robot dog, and a mouse search for homes?"),
+  q("guardian-test", "iwb", "action", "jacket", "In which book must a student at an academy learn to transform into a creature that protects nature?"),
+  q("kind-of-spark", "iwb", "action", "jacket", "In which book does a girl campaign for a memorial to people accused of witchcraft?"),
+  q("witch-boy", "iwb", "action", "jacket", "In which book does a boy secretly study a kind of magic that his family says is forbidden for him?"),
+  q("light-and-air", "iwb", "object", "jacket", "In which book does a girl find comfort and healing connected with a beekeeper's honey?"),
+  q("snow-and-rose", "iwb", "setting", "jacket", "In which book do two sisters explore an enchanted wood after their family life changes?"),
+  q("magic-misfits", "iwb", "action", "jacket", "In which book do young illusionists work together against a dangerous carnival?"),
+  q("caterpillar-summer", "iwb", "setting", "jacket", "In which book do a girl and her brother spend a summer with grandparents they have not met before?"),
+  q("family-fletcher", "iwb", "name", "jacket", "In which book do four boys and their two dads navigate an eventful school year?"),
+  q("esperanza-rising", "iwb", "setting", "jacket", "In which book does a girl leave a wealthy life in Mexico and move to a California farm camp?"),
+  q("lightning-thief", "iwb", "object", "local", "In which book can an ordinary-looking pen become a sword?"),
+  q("murder-at-the-museum", "iwb", "action", "jacket", "In which book does a young detective investigate a mysterious death in a museum?"),
+  q("end-of-the-world", "iwb", "action", "jacket", "In which book does a power outage leave a group of children wondering whether their families are the only people left?"),
+  q("connect-the-stars", "iwb", "setting", "jacket", "In which book do two young people face bullying and difficult challenges at a wilderness camp?"),
+  q("grace-of-wild-things", "iwb", "object", "jacket", "In which book must a girl learn every spell in a witch's book before a deadline?")
+
 ];
