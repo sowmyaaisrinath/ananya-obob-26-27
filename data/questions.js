@@ -13,7 +13,7 @@
 
 let counter = 0;
 
-function q(bookId, type, pattern, level, prompt, answer, alternates, parts) {
+function q(bookId, type, pattern, level, prompt, answer, alternates, parts, credit) {
   counter += 1;
   return {
     id: bookId + "-" + String(counter).padStart(3, "0"),
@@ -24,7 +24,12 @@ function q(bookId, type, pattern, level, prompt, answer, alternates, parts) {
     prompt,
     answer: answer || null,
     alternates: alternates || [],
-    parts: parts || null
+    parts: parts || null,
+    sourceType: credit?.sourceType || "site",
+    contributor: credit?.contributor || null,
+    sourceName: credit?.sourceName || null,
+    sourceUrl: credit?.sourceUrl || null,
+    reviewStatus: credit?.reviewStatus || "reviewed"
   };
 }
 
@@ -948,5 +953,21 @@ const QUESTIONS = [
   q("end-of-the-world", "iwb", "action", "jacket", "In which book does a power outage leave a group of children wondering whether their families are the only people left?"),
   q("connect-the-stars", "iwb", "setting", "jacket", "In which book do two young people face bullying and difficult challenges at a wilderness camp?"),
   q("grace-of-wild-things", "iwb", "object", "jacket", "In which book must a girl learn every spell in a witch's book before a deadline?")
+
+
+  // Student-contributed questions by Aishani Hegde.
+  // Answer keys await verification against the group's print editions.
+  q("magic-misfits", "two-part", "two-part", "regional", "In The Magic Misfits, who provides food for Carter and his uncle, and what do they usually get?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("magic-misfits", "content", "number", "regional", "In The Magic Misfits, how many Mr. Vernons are there?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("magic-misfits", "content", "object", "regional", "In The Magic Misfits, what diamond did B.B. Bosso steal?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("lightning-thief", "two-part", "two-part", "regional", "In The Lightning Thief, what does Hades tell Percy about his mother, and why does he tell him?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("magic-misfits", "content", "who", "regional", "In The Magic Misfits, what is the name of Mr. Vernon #1's daughter?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("lightning-thief", "two-part", "two-part", "regional", "In The Lightning Thief, what does Sally Jackson say when Percy asks whether she is still in love with Gabe, and why?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("magic-misfits", "two-part", "two-part", "regional", "In The Magic Misfits, what is the full name of the girl who uses a wheelchair?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("lightning-thief", "content", "who", "local", "In The Lightning Thief, what is Percy Jackson's father's name as a god?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("lightning-thief", "content", "who", "regional", "In The Lightning Thief, what is Annabeth's mother's name?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("lightning-thief", "content", "object", "local", "In The Lightning Thief, what type of pen does Percy use when he fights Mrs. Dodds at the beginning?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("magic-misfits", "two-part", "two-part", "regional", "In The Magic Misfits, what are the names of the twins who dance on a diving board?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" }),
+  q("lightning-thief", "two-part", "two-part", "regional", "In The Lightning Thief, what is Percy's Latin teacher's name, and where else does Percy regularly see them besides Yancy Academy?", null, [], null, { sourceType: "student", contributor: "Aishani Hegde", reviewStatus: "pending" })
 
 ];
