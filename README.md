@@ -20,7 +20,7 @@ Open `index.html` in a browser, or run `python3 -m http.server` in this folder.
 
 **Cards** is the full deck. Tap a card to turn it over. Tap more than one book to keep several on the table, then filter by round or by how hard the card should feel. Shuffle mixes the questions into a random order so you cannot guess what comes next from the list.
 
-**Battle** deals 16 cards in the real shape: eight "In Which Book," then eight content, each from a different book. Read them aloud, give 15 seconds, keep score on paper.
+**Battle** deals 16 cards in the real shape: eight "In Which Book," then eight content, each from a different book. Tap one or more titles first if you only want questions from books you have already read. Read them aloud, give 15 seconds, keep score on paper.
 
 **Patterns** is what the handbooks and public practice sets show about how real battle questions are written.
 

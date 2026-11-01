@@ -14,7 +14,7 @@ const SLUGS = {
 
 /* Nothing here is saved. Reloading the page starts over, which is the point:
    there is no database behind this site. */
-const view = { tab: "plan", books: [], type: "all", level: "all", shuffled: false, deckIds: [], battle: [] };
+const view = { tab: "plan", books: [], battleBooks: [], type: "all", level: "all", shuffled: false, deckIds: [], battle: [] };
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
@@ -125,21 +125,65 @@ function shuffle(list) {
   return copy;
 }
 
+function battlePool() {
+  if (!view.battleBooks.length) return BOOKS.slice();
+  return BOOKS.filter((book) => view.battleBooks.includes(book.id));
+}
+
+function battleBookNote() {
+  if (!view.battleBooks.length) return "all 16 books";
+  return view.battleBooks.length + (view.battleBooks.length === 1 ? " book" : " books");
+}
+
+function pickBattleRound(books, typeCheck, limit) {
+  const used = new Set();
+  const picked = [];
+  shuffle(books).forEach((book) => {
+    if (picked.length >= limit) return;
+    const choice = shuffle(QUESTIONS.filter((item) =>
+      item.bookId === book.id && typeCheck(item) && !used.has(item.id)
+    ))[0];
+    if (choice) {
+      used.add(choice.id);
+      picked.push(choice);
+    }
+  });
+  if (picked.length < limit) {
+    const extras = shuffle(QUESTIONS.filter((item) =>
+      books.some((book) => book.id === item.bookId) && typeCheck(item) && !used.has(item.id)
+    ));
+    extras.slice(0, limit - picked.length).forEach((item) => picked.push(item));
+  }
+  return picked;
+}
+
 function buildBattle() {
-  const usable = shuffle(BOOKS.filter((book) =>
+  const pool = battlePool();
+  const both = shuffle(pool.filter((book) =>
     QUESTIONS.some((item) => item.bookId === book.id && item.type === "iwb") &&
     QUESTIONS.some((item) => item.bookId === book.id && isContent(item))
   ));
-  const picked = [];
-  usable.slice(0, 8).forEach((book) => {
-    const choice = shuffle(QUESTIONS.filter((item) => item.bookId === book.id && item.type === "iwb"))[0];
-    if (choice) picked.push(choice);
-  });
-  usable.slice(8, 16).forEach((book) => {
-    const choice = shuffle(QUESTIONS.filter((item) => item.bookId === book.id && isContent(item)))[0];
-    if (choice) picked.push(choice);
-  });
-  view.battle = picked;
+  if (both.length >= 16) {
+    const picked = [];
+    both.slice(0, 8).forEach((book) => {
+      const choice = shuffle(QUESTIONS.filter((item) => item.bookId === book.id && item.type === "iwb"))[0];
+      if (choice) picked.push(choice);
+    });
+    both.slice(8, 16).forEach((book) => {
+      const choice = shuffle(QUESTIONS.filter((item) => item.bookId === book.id && isContent(item)))[0];
+      if (choice) picked.push(choice);
+    });
+    view.battle = picked;
+    return;
+  }
+  const withIwb = pool.filter((book) =>
+    QUESTIONS.some((item) => item.bookId === book.id && item.type === "iwb")
+  );
+  const withContent = pool.filter((book) =>
+    QUESTIONS.some((item) => item.bookId === book.id && isContent(item))
+  );
+  view.battle = pickBattleRound(withIwb, (item) => item.type === "iwb", 8)
+    .concat(pickBattleRound(withContent, isContent, 8));
 }
 
 function render() {
@@ -365,29 +409,57 @@ function flipCard(item) {
   </button>`;
 }
 
-function renderBattle() {
-  if (!view.battle.length) {
-    return `
-      <h2>Practice battle</h2>
-      <p class="sub">A full set is 16 cards: eight “In Which Book,” then eight content, each from a different book. That is the shape the public library practice sets use. A real battle may ask about one book twice and skip another.</p>
-      <p class="note">Read the card aloud, give the team 15 seconds, then tap to turn it over. Keep score on paper. “In Which Book” is 5 points for the title and author together, 3 for whichever part comes first. Content is 5 points, all or nothing, unless the card says two parts.</p>
-      <button type="button" class="btn" data-action="new-battle">Deal a 16-card set</button>`;
+function battleBookPills() {
+  return `<div class="filters noprint">
+    <div class="pills"><span class="pill-label">Book</span>
+      ${battlePill("all", "All")}
+      ${orderedBooks().map((book) => battlePill(book.id, book.title)).join("")}
+    </div>
+  </div>`;
+}
+
+function battlePill(id, label) {
+  const on = id === "all" ? view.battleBooks.length === 0 : view.battleBooks.includes(id);
+  return `<button type="button" class="pill ${on ? "on" : ""}" data-action="battle-book" data-value="${esc(id)}">${esc(label)}</button>`;
+}
+
+function toggleBattleBook(id) {
+  if (id === "all") {
+    view.battleBooks = [];
+    return;
   }
+  if (view.battleBooks.includes(id)) {
+    view.battleBooks = view.battleBooks.filter((bookId) => bookId !== id);
+    return;
+  }
+  view.battleBooks = view.battleBooks.concat(id);
+}
+
+function renderBattle() {
   const iwb = view.battle.filter((item) => item.type === "iwb");
   const content = view.battle.filter(isContent);
+  const subset = view.battleBooks.length > 0 && view.battleBooks.length < 16;
   return `
     <h2>Practice battle</h2>
-    <p class="sub">${view.battle.length} cards. Read them in this order.</p>
+    <p class="sub">${view.battle.length
+      ? view.battle.length + " cards from " + battleBookNote() + ". Read them in this order."
+      : "A full set is 16 cards: eight “In Which Book,” then eight content. With all 16 books, each card comes from a different book. Tap one or more titles to keep the deal inside those books."}</p>
+    <p class="note">${subset
+      ? "A shorter list still aims for eight of each kind. A book may come up more than once. Read the card aloud, give the team 15 seconds, then tap to turn it over. Keep score on paper."
+      : "Read the card aloud, give the team 15 seconds, then tap to turn it over. Keep score on paper. “In Which Book” is 5 points for the title and author together, 3 for whichever part comes first. Content is 5 points, all or nothing, unless the card says two parts."}</p>
+    ${battleBookPills()}
     <div class="row noprint" style="margin-bottom:14px">
-      <button type="button" class="btn" data-action="new-battle">Deal a new set</button>
+      <button type="button" class="btn" data-action="new-battle">${view.battle.length ? "Deal a new set" : "Deal a set"}</button>
+      ${view.battle.length ? `
       <button type="button" class="ghost" data-action="flip-all">Turn them all over</button>
       <button type="button" class="ghost" data-action="flip-none">Turn them all back</button>
-      <button type="button" class="ghost" data-action="print">Print this set</button>
+      <button type="button" class="ghost" data-action="print">Print this set</button>` : ""}
     </div>
+    ${view.battle.length ? `
     <h3>Round one — In Which Book <span class="sub">(${iwb.length})</span></h3>
     <div class="deck">${iwb.map(flipCard).join("")}</div>
     <h3 style="margin-top:22px">Round two — Content <span class="sub">(${content.length})</span></h3>
-    <div class="deck">${content.map(flipCard).join("")}</div>`;
+    <div class="deck">${content.map(flipCard).join("")}</div>` : ""}`;
 }
 
 function renderPatterns() {
@@ -439,6 +511,11 @@ function bind() {
     if (action === "filter") {
       if (target.dataset.group === "book") toggleBookFilter(target.dataset.value);
       else view[target.dataset.group] = target.dataset.value;
+      render();
+    }
+    if (action === "battle-book") {
+      toggleBattleBook(target.dataset.value);
+      view.battle = [];
       render();
     }
     if (action === "shuffle") {
