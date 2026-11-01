@@ -14,7 +14,7 @@ const SLUGS = {
 
 /* Nothing here is saved. Reloading the page starts over, which is the point:
    there is no database behind this site. */
-const view = { tab: "plan", book: "all", type: "all", level: "all", battle: [] };
+const view = { tab: "plan", books: [], type: "all", level: "all", battle: [] };
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
@@ -265,18 +265,38 @@ function renderBooks() {
   return `<h2>The 16 books</h2><p class="sub">Ordered from the shortest careful read to the longest.</p><div class="cards">${cards}</div>`;
 }
 
+function bookFilterOn(id) {
+  if (id === "all") return view.books.length === 0;
+  return view.books.includes(id);
+}
+
+function toggleBookFilter(id) {
+  if (id === "all") {
+    view.books = [];
+    return;
+  }
+  if (view.books.includes(id)) {
+    view.books = view.books.filter((bookId) => bookId !== id);
+    return;
+  }
+  view.books = view.books.concat(id);
+}
+
 function renderCards() {
   const shown = QUESTIONS.filter((item) => {
-    if (view.book !== "all" && item.bookId !== view.book) return false;
+    if (view.books.length && !view.books.includes(item.bookId)) return false;
     if (view.type === "iwb" && item.type !== "iwb") return false;
     if (view.type === "content" && item.type === "iwb") return false;
     if (view.type === "two-part" && item.type !== "two-part") return false;
     if (view.level !== "all" && item.level !== view.level) return false;
     return true;
   });
+  const bookNote = view.books.length
+    ? view.books.length + (view.books.length === 1 ? " book" : " books")
+    : "all 16 books";
   return `
     <h2>Flip cards</h2>
-    <p class="sub">${shown.length} showing. Tap a card to turn it over. Nothing is saved, so a reload brings every card back face up.</p>
+    <p class="sub">${shown.length} showing from ${bookNote}. Tap more than one book to keep several on the table. Nothing is saved, so a reload brings every card back face up.</p>
     <div class="filters noprint">
       <div class="pills"><span class="pill-label">Book</span>
         ${pill("book", "all", "All")}
@@ -302,7 +322,7 @@ function renderCards() {
 }
 
 function pill(group, value, label) {
-  const on = view[group] === value;
+  const on = group === "book" ? bookFilterOn(value) : view[group] === value;
   return `<button type="button" class="pill ${on ? "on" : ""}" data-action="filter" data-group="${group}" data-value="${esc(value)}">${esc(label)}</button>`;
 }
 
@@ -390,14 +410,15 @@ function bind() {
     }
     if (action === "see-cards") {
       view.tab = "cards";
-      view.book = target.dataset.book;
+      view.books = [target.dataset.book];
       view.type = "all";
       view.level = "all";
       render();
       window.scrollTo(0, 0);
     }
     if (action === "filter") {
-      view[target.dataset.group] = target.dataset.value;
+      if (target.dataset.group === "book") toggleBookFilter(target.dataset.value);
+      else view[target.dataset.group] = target.dataset.value;
       render();
     }
     if (action === "flip-all") {
